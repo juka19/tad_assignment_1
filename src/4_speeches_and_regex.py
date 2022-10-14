@@ -1,7 +1,7 @@
 import pandas as pd
-from spacy.lang.de import German
 import re
 from collections import defaultdict
+import string
 
 speeches = pd.read_excel('data\\bt_session.xlsx')
 
@@ -13,15 +13,16 @@ print(f"""
       """)
 
 def find_matches(speeches):
-    protocol = ' '.join(speeches)
-    nlp = German()
+    protocol = ' '.join(speeches).split(' ')
     matches = defaultdict(int)
-    pattern = re.compile('[kK][oO][hH][lL][eE]')
-    for token in nlp.tokenizer(protocol):
-        if re.match(pattern, token.text) != None:
-            matches[token.text] += 1
+    pattern = re.compile('.*[kK][oO][hH][lL][eE]')
+    for token in protocol:
+        token = token.translate(
+            str.maketrans('', '', string.punctuation))
+        if re.match(pattern, token) != None:
+            matches[token] += 1
     return matches
-            
+
 kohle = find_matches(speeches.text)
 (pd.DataFrame.from_dict(dict(kohle), orient='index')
  .reset_index()
